@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_blog/data/gm/session_gm.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../data/gvm/session_gvm.dart';
 
 class SplashPage extends ConsumerWidget {
   const SplashPage({super.key});
