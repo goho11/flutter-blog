@@ -61,7 +61,7 @@ class SessionGVM extends Notifier<SessionUser> {
         isLogin: true);
 
     // 10-3. Dio 토큰 세팅
-    dio.options.headers = {"Authorization": accessToken};
+    dio.options.headers["Authorization"] = accessToken;
 
     // Logger().d(dio.options.headers);
 
@@ -97,7 +97,10 @@ class SessionGVM extends Notifier<SessionUser> {
     // 3-2. 상태 갱신
     state = SessionUser(); // 값이 없으면 기본 null
 
-    // 3-3. 화면이동
+    // 3-3. dio 갱신
+    dio.options.headers["Authorization"] = "";
+
+    // 3-4. 화면이동
     Navigator.popAndPushNamed(mContext, "/login");
   }
 
@@ -129,6 +132,8 @@ class SessionGVM extends Notifier<SessionUser> {
         username: data["username"],
         accessToken: accessToken,
         isLogin: true);
+
+    dio.options.headers["Authorization"] = accessToken;
 
     Navigator.popAndPushNamed(mContext, "/post/list");
   }

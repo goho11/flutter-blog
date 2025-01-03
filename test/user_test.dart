@@ -8,3 +8,15 @@ class User {
         this.username = map["username"],
         this.imgUrl = map["imgUrl"];
 }
+
+void main() {
+  Map<String, dynamic> map = {
+    "id": 1,
+    "username": null,
+  };
+
+  User u = User.fromMap(map);
+  print(u.id);
+  print(u.username);
+  print(u.imgUrl);
+}

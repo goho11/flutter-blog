@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_blog/data/model/post.dart';
 
 class PostListItem extends StatelessWidget {
-  const PostListItem({Key? key}) : super(key: key);
+  const PostListItem({Key? key, required Post post}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
