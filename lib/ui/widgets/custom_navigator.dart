@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blog/_core/constants/size.dart';
+import 'package:flutter_blog/data/gvm/session_gvm.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CustomNavigation extends StatelessWidget {
+// 로그아웃
+// 1. 위젯 변경, ref 추가
+class CustomNavigation extends ConsumerWidget {
   final scaffoldKey;
+
   const CustomNavigation(this.scaffoldKey, {Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    SessionGVM gvm = ref.read(sessionProvider.notifier);
+
     return Container(
       width: getDrawerWidth(context),
       height: double.infinity,
@@ -34,8 +41,8 @@ class CustomNavigation extends StatelessWidget {
               const Divider(),
               TextButton(
                 onPressed: () {
-                  scaffoldKey.currentState!.openEndDrawer();
-                  Navigator.popAndPushNamed(context, "/login");
+                  // 2. 메서드 추가 -> logout 이동
+                  gvm.logout();
                 },
                 child: const Text(
                   "로그아웃",
