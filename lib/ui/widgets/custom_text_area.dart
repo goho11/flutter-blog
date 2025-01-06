@@ -3,15 +3,18 @@ import 'package:flutter/material.dart';
 class CustomTextArea extends StatelessWidget {
   final String hint;
   final TextEditingController controller;
+  final String initValue;
 
-  const CustomTextArea({
-    Key? key,
-    required this.hint,
-    required this.controller,
-  }) : super(key: key);
+  const CustomTextArea(
+      {required this.hint, required this.controller, this.initValue = ""});
 
   @override
   Widget build(BuildContext context) {
+    // 컨텐츠에 안 적으면 아무것도 안하기(공백)
+    if (initValue.isNotEmpty) {
+      controller.text = initValue;
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5),
       child: TextFormField(

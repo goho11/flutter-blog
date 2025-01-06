@@ -15,6 +15,30 @@ class PostListModel {
   int totalPage;
   List<Post> posts;
 
+  PostListModel(
+      {required this.isFirst,
+      required this.isLast,
+      required this.pageNumber,
+      required this.size,
+      required this.totalPage,
+      required this.posts});
+
+  PostListModel copyWith(
+      {bool? isFirst,
+      bool? isLast,
+      int? pageNumber,
+      int? size,
+      int? totalPage,
+      List<Post>? posts}) {
+    return PostListModel(
+        isFirst: isFirst ?? this.isFirst,
+        isLast: isLast ?? this.isLast,
+        pageNumber: pageNumber ?? this.pageNumber,
+        size: size ?? this.size,
+        totalPage: totalPage ?? this.totalPage,
+        posts: posts ?? this.posts);
+  }
+
   PostListModel.fromMap(Map<String, dynamic> map)
       : isFirst = map["isFirst"],
         isLast = map["isLast"],
@@ -64,5 +88,22 @@ class PostListVM extends Notifier<PostListModel?> {
     }
     // 실패안하면 state에 데이터 적용
     state = PostListModel.fromMap(responseBody["response"]);
+  }
+
+  // 게시글 삭제
+  void remove(int id) {
+    // 해당 번호로 state를 갱신
+    PostListModel model = state!; // 얕은 복사(주소만)
+    // posts에 새로운 posts 깊은 복사
+    model.posts = model.posts.where((p) => p.id != id).toList();
+    // state에 담아 다시 끌어올림
+    state = state!.copyWith(posts: model.posts);
+  }
+
+  // 게시글 추가
+  void add(Post post) {
+    PostListModel model = state!;
+    model.posts = [post, ...model.posts];
+    state = state!.copyWith(posts: model.posts);
   }
 }
