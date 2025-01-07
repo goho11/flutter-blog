@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_blog/data/gvm/post_event_bus_gvm.dart';
 import 'package:flutter_blog/data/model/post.dart';
 import 'package:flutter_blog/data/repository/post_repository.dart';
 import 'package:flutter_blog/main.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logger/logger.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-// 1. 초기 세팅: 화면에 필요한 모델 페이지 생성
-// 화면 정보를 받는 클래스 생성 및 받기
-// return값을 api문서로 찾기
 class PostListModel {
   bool isFirst;
   bool isLast;
@@ -40,29 +39,21 @@ class PostListModel {
         posts: posts ?? this.posts);
   }
 
-  // 데이터 통신
-  // 1. list 타입으로 바꾸고
-  // 2. .map을 사용가능할때, 다이나믹으로 바꿈
-  // 3. e가 묵시적 형변환
   PostListModel.fromMap(Map<String, dynamic> map)
       : isFirst = map["isFirst"],
         isLast = map["isLast"],
         pageNumber = map["pageNumber"],
         size = map["size"],
         totalPage = map["totalPage"],
-        // dynamic으로 변환
         posts = (map["posts"] as List<dynamic>)
             .map((e) => Post.fromMap(e))
             .toList();
 }
 
-// Provider 창고관리자
 final postListProvider = NotifierProvider<PostListVM, PostListModel?>(() {
   return PostListVM();
 });
 
-// VM 창고
-// post레파지토리 만들고 넘어옴
 class PostListVM extends Notifier<PostListModel?> {
   final refreshCtrl = RefreshController();
   final mContext = navigatorKey.currentContext!;
@@ -71,6 +62,17 @@ class PostListVM extends Notifier<PostListModel?> {
   @override
   PostListModel? build() {
     init();
+
+    ref.listen<PostEvent>(postEventBusProvider, (previous, next) {
+      if (next.deletedPostId != null) {
+        Logger().d("삭제 수신함 event 발생 ${next.deletedPostId}");
+        remove(next.deletedPostId!);
+      }
+      if (next.updatedPost != null) {
+        update(next.updatedPost!);
+      }
+    });
+
     return null;
   }
 
@@ -85,6 +87,7 @@ class PostListVM extends Notifier<PostListModel?> {
       );
       return;
     }
+
     state = PostListModel.fromMap(responseBody["response"]);
     refreshCtrl.refreshCompleted();
   }
@@ -108,27 +111,40 @@ class PostListVM extends Notifier<PostListModel?> {
       );
       return;
     }
-    PostListModel prevModrl = state!;
+
+    PostListModel prevModel = state!;
     PostListModel nextModel = PostListModel.fromMap(responseBody["response"]);
 
-    state = nextModel.copyWith(posts: [...prevModrl.posts, ...nextModel.posts]);
+    state = nextModel.copyWith(posts: [...prevModel.posts, ...nextModel.posts]);
     refreshCtrl.loadComplete();
   }
 
-  // 게시글 삭제
   void remove(int id) {
-    // 해당 번호로 state를 갱신
-    PostListModel model = state!; // 얕은 복사(주소만)
-    // posts에 새로운 posts 깊은 복사
+    PostListModel model = state!;
+
     model.posts = model.posts.where((p) => p.id != id).toList();
-    // state에 담아 다시 끌어올림
+
     state = state!.copyWith(posts: model.posts);
   }
 
-  // 게시글 추가
   void add(Post post) {
     PostListModel model = state!;
+
     model.posts = [post, ...model.posts];
+
     state = state!.copyWith(posts: model.posts);
+  }
+
+  void update(Post updatedPost) {
+    PostListModel model = state!;
+
+    List<Post> updatedPosts = model.posts.map((post) {
+      if (post.id == updatedPost.id) {
+        return updatedPost; // 수정된 게시글로 교체
+      }
+      return post; // 나머지는 그대로 유지
+    }).toList();
+
+    state = state!.copyWith(posts: updatedPosts); // 리스트 복사로 상태 반영
   }
 }

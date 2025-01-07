@@ -3,10 +3,8 @@ import 'package:flutter_blog/_core/constants/size.dart';
 import 'package:flutter_blog/data/gvm/session_gvm.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// 로그아웃
-// 1. 위젯 변경, ref 추가
 class CustomNavigation extends ConsumerWidget {
-  final scaffoldKey;
+  final GlobalKey<ScaffoldState> scaffoldKey;
 
   const CustomNavigation(this.scaffoldKey, {Key? key}) : super(key: key);
 
@@ -40,9 +38,12 @@ class CustomNavigation extends ConsumerWidget {
               ),
               const Divider(),
               TextButton(
-                onPressed: () {
-                  // 2. 메서드 추가 -> logout 이동
-                  gvm.logout();
+                onPressed: () async {
+                  await gvm.logout();
+                  // 1. PostListVM과 UI를 날리는 첫번째 방법 (꼭 Drawer를 닫고 pop해야함)
+                  // scaffoldKey.currentState?.openEndDrawer();
+                  // Navigator.popAndPushNamed(
+                  //     scaffoldKey.currentContext!, "/login");
                 },
                 child: const Text(
                   "로그아웃",
